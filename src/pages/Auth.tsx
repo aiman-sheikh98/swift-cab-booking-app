@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Mail, Lock, Google } from "lucide-react";
+import { Mail, Lock } from "lucide-react";
 
 const Auth = () => {
   const [email, setEmail] = React.useState('');
@@ -155,7 +154,17 @@ const Auth = () => {
               className="w-full"
               disabled={loading}
             >
-              <Google className="h-4 w-4 mr-2" />
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                className="mr-2 h-4 w-4"
+              >
+                <path d="M22 12.1401C22 6.54012 17.5 2.04012 12 2.04012C6.5 2.04012 2 6.54012 2 12.1401C2 17.0601 5.66 21.0901 10.4375 21.8901V14.8901H7.89844V12.1401H10.4375V9.98762C10.4375 7.48762 11.9156 6.11012 14.2031 6.11012C15.2938 6.11012 16.4375 6.30012 16.4375 6.30012V8.74012H15.1719C13.9219 8.74012 13.5625 9.48762 13.5625 10.2626V12.1401H16.3344L15.9219 14.8901H13.5625V21.8901C18.34 21.0901 22 17.0601 22 12.1401Z" fill="#1877F2"/>
+              </svg>
               Google
             </Button>
           </div>

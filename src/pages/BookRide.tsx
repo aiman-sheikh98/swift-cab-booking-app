@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { RideMap } from '@/components/RideMap';
 import { VehicleCarousel } from '@/components/VehicleCarousel';
 import { useLocationSuggestions } from '@/hooks/use-location-suggestions';
+import { supabase } from "@/integrations/supabase/client";
 
 const BookRide = () => {
   const [pickupLocation, setPickupLocation] = useState('');
@@ -51,12 +52,22 @@ const BookRide = () => {
       return;
     }
 
-    // Simulate API call
     try {
-      // In a real app, this would be an API call to create a booking
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const rideId = Math.floor(1000 + Math.random() * 9000).toString();
+      const { data, error } = await supabase
+        .from('rides')
+        .insert([
+          {
+            pickup_location: pickupLocation,
+            dropoff_location: dropoffLocation,
+            date: format(date, "MMM dd, yyyy"),
+            time: time,
+            status: 'scheduled'
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
       
       toast.success("Ride booked successfully!");
       navigate('/rides');

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Calendar, Clock } from "lucide-react";
+import { MapPin, Calendar, Clock, Car } from "lucide-react";
 
 export type RideStatus = 'scheduled' | 'completed' | 'cancelled' | 'in-progress';
 
@@ -26,12 +26,15 @@ const RideCard = ({ id, pickupLocation, dropoffLocation, date, time, status }: R
   const statusInfo = statusConfig[status];
   
   return (
-    <Card className="hover:shadow-md transition-shadow duration-300 cursor-pointer border-slate-200">
+    <Card className="hover:shadow-md transition-all duration-300 cursor-pointer border-slate-200 hover:border-swift-200 group">
       <CardContent className="p-4">
         <div className="flex justify-between items-start">
           <div className="space-y-3">
             <div className="space-y-1">
-              <h3 className="font-medium text-slate-900">Ride #{id}</h3>
+              <div className="flex items-center">
+                <Car className="h-4 w-4 mr-2 text-swift-600" />
+                <h3 className="font-medium text-slate-900">Ride #{id}</h3>
+              </div>
               <div className="flex items-center text-sm text-slate-500">
                 <Calendar className="h-4 w-4 mr-1" />
                 <span>{date}</span>
@@ -49,6 +52,11 @@ const RideCard = ({ id, pickupLocation, dropoffLocation, date, time, status }: R
                   <p className="text-sm text-slate-700">{pickupLocation}</p>
                 </div>
               </div>
+              <div className="relative">
+                <div className="absolute left-2.5 top-0 h-full">
+                  <div className="h-full w-0.5 bg-slate-200 mx-auto"></div>
+                </div>
+              </div>
               <div className="flex items-start">
                 <MapPin className="h-5 w-5 text-swift-800 mr-2 mt-0.5" />
                 <div>
@@ -61,11 +69,24 @@ const RideCard = ({ id, pickupLocation, dropoffLocation, date, time, status }: R
           
           <Badge 
             variant="outline" 
-            className={`${statusInfo.color} border-none whitespace-nowrap`}
+            className={`${statusInfo.color} border-none whitespace-nowrap transition-transform group-hover:scale-110`}
           >
             {statusInfo.label}
           </Badge>
         </div>
+        
+        {/* Progress Bar for in-progress rides */}
+        {status === 'in-progress' && (
+          <div className="mt-4">
+            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+              <div className="bg-swift-600 h-1.5 rounded-full animate-pulse" style={{width: '60%'}}></div>
+            </div>
+            <div className="flex justify-between text-xs text-slate-500 mt-1">
+              <span>On the way</span>
+              <span>Arriving soon</span>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

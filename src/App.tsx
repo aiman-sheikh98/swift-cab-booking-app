@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import MyRides from "./pages/MyRides";
 import BookRide from "./pages/BookRide";
+import Payment from "./pages/Payment";
 import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
 
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/rides" element={<MyRides />} />
             <Route path="/book" element={<BookRide />} />
+            <Route path="/payment" element={<Payment />} />
             <Route path="/support" element={<Support />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

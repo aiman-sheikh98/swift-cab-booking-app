@@ -1,14 +1,34 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { Car, Menu, X } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Car, Menu, X, LogOut } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast.success('Successfully signed out');
+      navigate('/auth');
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleAuthClick = () => {
+    navigate('/auth');
+    setIsMenuOpen(false);
   };
 
   return (
@@ -37,9 +57,23 @@ const Header = () => {
             <Link to="/support" className="text-slate-700 hover:text-swift-600 font-medium">
               Support
             </Link>
-            <Button className="bg-swift-600 hover:bg-swift-700 text-white">
-              Sign In
-            </Button>
+            {user ? (
+              <Button 
+                onClick={handleSignOut}
+                variant="outline"
+                className="text-swift-600 border-swift-600 hover:bg-swift-50"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            ) : (
+              <Button 
+                onClick={handleAuthClick}
+                className="bg-swift-600 hover:bg-swift-700 text-white"
+              >
+                Sign In
+              </Button>
+            )}
           </nav>
 
           {/* Mobile menu button */}
@@ -85,11 +119,23 @@ const Header = () => {
             >
               Support
             </Link>
-            <div className="pt-2">
-              <Button className="w-full bg-swift-600 hover:bg-swift-700 text-white">
+            {user ? (
+              <Button 
+                onClick={handleSignOut}
+                variant="outline"
+                className="w-full text-swift-600 border-swift-600 hover:bg-swift-50"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            ) : (
+              <Button 
+                onClick={handleAuthClick}
+                className="w-full bg-swift-600 hover:bg-swift-700 text-white"
+              >
                 Sign In
               </Button>
-            </div>
+            )}
           </div>
         )}
       </div>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -15,6 +14,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { RideMap } from '@/components/RideMap';
 import { VehicleCarousel } from '@/components/VehicleCarousel';
+import { useLocationSuggestions } from '@/hooks/use-location-suggestions';
 
 const BookRide = () => {
   const [pickupLocation, setPickupLocation] = useState('');
@@ -24,6 +24,22 @@ const BookRide = () => {
   const [vehicleType, setVehicleType] = useState('standard');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { getSuggestion, isLoading: isSuggestingLocation } = useLocationSuggestions();
+
+  const handleLocationSuggestion = async (type: 'pickup' | 'dropoff', value: string) => {
+    if (!value.trim()) return;
+
+    const suggestion = await getSuggestion(value, type);
+    if (suggestion) {
+      if (type === 'pickup') {
+        setPickupLocation(suggestion);
+        toast.success("Pickup location suggested!");
+      } else {
+        setDropoffLocation(suggestion);
+        toast.success("Dropoff location suggested!");
+      }
+    }
+  };
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,10 +112,20 @@ const BookRide = () => {
                         id="pickup"
                         value={pickupLocation}
                         onChange={(e) => setPickupLocation(e.target.value)}
-                        className="pl-10"
+                        className="pl-10 pr-24"
                         placeholder="Enter pickup address"
                         required
                       />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-2 top-2"
+                        onClick={() => handleLocationSuggestion('pickup', pickupLocation)}
+                        disabled={isSuggestingLocation || !pickupLocation}
+                      >
+                        {isSuggestingLocation ? "Suggesting..." : "Suggest"}
+                      </Button>
                     </div>
                   </div>
 
@@ -111,10 +137,20 @@ const BookRide = () => {
                         id="dropoff"
                         value={dropoffLocation}
                         onChange={(e) => setDropoffLocation(e.target.value)}
-                        className="pl-10"
+                        className="pl-10 pr-24"
                         placeholder="Enter destination"
                         required
                       />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-2 top-2"
+                        onClick={() => handleLocationSuggestion('dropoff', dropoffLocation)}
+                        disabled={isSuggestingLocation || !dropoffLocation}
+                      >
+                        {isSuggestingLocation ? "Suggesting..." : "Suggest"}
+                      </Button>
                     </div>
                   </div>
 

@@ -8,9 +8,17 @@ import { BookingForm } from './BookingForm';
 
 interface BookingDetailsCardProps {
   vehicleType: string;
+  pickupLocation: string;
+  dropoffLocation: string;
+  onLocationChange: (type: 'pickup' | 'dropoff', value: string) => void;
 }
 
-export const BookingDetailsCard: React.FC<BookingDetailsCardProps> = ({ vehicleType }) => {
+export const BookingDetailsCard: React.FC<BookingDetailsCardProps> = ({ 
+  vehicleType, 
+  pickupLocation, 
+  dropoffLocation, 
+  onLocationChange 
+}) => {
   const navigate = useNavigate();
 
   return (
@@ -19,7 +27,12 @@ export const BookingDetailsCard: React.FC<BookingDetailsCardProps> = ({ vehicleT
         <CardTitle className="text-xl">Ride Details</CardTitle>
       </CardHeader>
       <CardContent>
-        <BookingForm vehicleType={vehicleType} />
+        <BookingForm 
+          vehicleType={vehicleType} 
+          pickupLocation={pickupLocation}
+          dropoffLocation={dropoffLocation}
+          onLocationChange={onLocationChange}
+        />
       </CardContent>
       <CardFooter>
         <Button 

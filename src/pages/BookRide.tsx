@@ -10,6 +10,14 @@ const BookRide = () => {
   const [pickupLocation, setPickupLocation] = useState('');
   const [dropoffLocation, setDropoffLocation] = useState('');
 
+  const handleLocationChange = (type: 'pickup' | 'dropoff', value: string) => {
+    if (type === 'pickup') {
+      setPickupLocation(value);
+    } else {
+      setDropoffLocation(value);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Header />
@@ -33,7 +41,12 @@ const BookRide = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <BookingDetailsCard vehicleType={vehicleType} />
+            <BookingDetailsCard 
+              vehicleType={vehicleType}
+              onLocationChange={handleLocationChange}
+              pickupLocation={pickupLocation}
+              dropoffLocation={dropoffLocation}
+            />
           </div>
         </div>
       </div>

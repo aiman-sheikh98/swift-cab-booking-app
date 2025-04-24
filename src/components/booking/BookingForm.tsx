@@ -16,11 +16,17 @@ import { useAuth } from "@/lib/auth";
 
 interface BookingFormProps {
   vehicleType: string;
+  pickupLocation: string;
+  dropoffLocation: string;
+  onLocationChange: (type: 'pickup' | 'dropoff', value: string) => void;
 }
 
-export const BookingForm: React.FC<BookingFormProps> = ({ vehicleType }) => {
-  const [pickupLocation, setPickupLocation] = React.useState('');
-  const [dropoffLocation, setDropoffLocation] = React.useState('');
+export const BookingForm: React.FC<BookingFormProps> = ({ 
+  vehicleType, 
+  pickupLocation, 
+  dropoffLocation, 
+  onLocationChange 
+}) => {
   const [date, setDate] = React.useState<Date>();
   const [time, setTime] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
@@ -33,13 +39,8 @@ export const BookingForm: React.FC<BookingFormProps> = ({ vehicleType }) => {
 
     const suggestion = await getSuggestion(value, type);
     if (suggestion) {
-      if (type === 'pickup') {
-        setPickupLocation(suggestion);
-        toast.success("Pickup location suggested!");
-      } else {
-        setDropoffLocation(suggestion);
-        toast.success("Dropoff location suggested!");
-      }
+      onLocationChange(type, suggestion);
+      toast.success(`${type === 'pickup' ? 'Pickup' : 'Dropoff'} location suggested!`);
     }
   };
 
@@ -85,7 +86,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({ vehicleType }) => {
           <Input 
             id="pickup"
             value={pickupLocation}
-            onChange={(e) => setPickupLocation(e.target.value)}
+            onChange={(e) => onLocationChange('pickup', e.target.value)}
             className="pl-10 pr-24"
             placeholder="Enter pickup address"
             required
@@ -110,7 +111,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({ vehicleType }) => {
           <Input 
             id="dropoff"
             value={dropoffLocation}
-            onChange={(e) => setDropoffLocation(e.target.value)}
+            onChange={(e) => onLocationChange('dropoff', e.target.value)}
             className="pl-10 pr-24"
             placeholder="Enter destination"
             required

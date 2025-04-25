@@ -1,8 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Calendar, Clock, Car } from "lucide-react";
+import { RideActions } from './booking/RideActions';
+import { motion } from "framer-motion";
 
 export type RideStatus = 'scheduled' | 'completed' | 'cancelled' | 'in-progress';
 
@@ -13,6 +14,8 @@ interface RideCardProps {
   date: string;
   time: string;
   status: RideStatus;
+  onCancel?: (rideId: string) => Promise<void>;
+  onSchedule?: (rideId: string) => void;
 }
 
 const statusConfig = {
@@ -22,11 +25,20 @@ const statusConfig = {
   'in-progress': { color: 'bg-amber-100 text-amber-800 hover:bg-amber-100', label: 'In Progress' }
 };
 
-const RideCard = ({ id, pickupLocation, dropoffLocation, date, time, status }: RideCardProps) => {
+const RideCard = ({ 
+  id, 
+  pickupLocation, 
+  dropoffLocation, 
+  date, 
+  time, 
+  status, 
+  onCancel,
+  onSchedule 
+}: RideCardProps) => {
   const statusInfo = statusConfig[status];
   
   return (
-    <Card className="hover:shadow-md transition-all duration-300 cursor-pointer border-slate-200 hover:border-swift-200 group">
+    <Card className="hover:shadow-md transition-all duration-300 border-slate-200 hover:border-swift-200 group">
       <CardContent className="p-4">
         <div className="flex justify-between items-start">
           <div className="space-y-3">
@@ -87,6 +99,13 @@ const RideCard = ({ id, pickupLocation, dropoffLocation, date, time, status }: R
             </div>
           </div>
         )}
+
+        <RideActions
+          rideId={id}
+          status={status}
+          onCancel={onCancel!}
+          onSchedule={onSchedule}
+        />
       </CardContent>
     </Card>
   );

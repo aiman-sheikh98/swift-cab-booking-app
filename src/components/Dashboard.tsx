@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Car, Plus, MapPin, CreditCard, Calendar, Locate } from "lucide-react";
@@ -10,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Ride, RideStatus } from '@/hooks/use-rides';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 
 const Dashboard = () => {
   const [rides, setRides] = useState<Ride[]>([]);
@@ -89,6 +89,10 @@ const Dashboard = () => {
   
   const handleBookRide = () => {
     navigate('/book');
+  };
+
+  const handleSchedule = (rideId: string) => {
+    toast.info("Reschedule feature coming soon!");
   };
 
   return (
@@ -200,6 +204,8 @@ const Dashboard = () => {
                         date={ride.date}
                         time={ride.time}
                         status={ride.status}
+                        onCancel={updateRideStatus}
+                        onSchedule={handleSchedule}
                       />
                     </motion.div>
                   </motion.div>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -100,12 +101,14 @@ const RideCard = ({
           </div>
         )}
 
-        <RideActions
-          rideId={id}
-          status={status}
-          onCancel={onCancel!}
-          onSchedule={onSchedule}
-        />
+        {(onCancel || onSchedule) && status === 'scheduled' && (
+          <RideActions
+            rideId={id}
+            status={status}
+            onCancel={onCancel!}
+            onSchedule={onSchedule}
+          />
+        )}
       </CardContent>
     </Card>
   );

@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { Ride, RideStatus } from '@/hooks/use-rides';
+import { Ride, RideStatus, useRides } from '@/hooks/use-rides';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 
@@ -16,6 +16,7 @@ const Dashboard = () => {
   const [newBookingId, setNewBookingId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { updateRideStatus } = useRides();
   
   useEffect(() => {
     const fetchRides = async () => {
@@ -93,6 +94,15 @@ const Dashboard = () => {
 
   const handleSchedule = (rideId: string) => {
     toast.info("Reschedule feature coming soon!");
+  };
+
+  const handleCancelRide = async (rideId: string) => {
+    try {
+      await updateRideStatus(rideId, 'cancelled');
+      toast.success(`Ride #${rideId} has been cancelled`);
+    } catch (error) {
+      toast.error("Failed to cancel ride. Please try again.");
+    }
   };
 
   return (
@@ -204,7 +214,7 @@ const Dashboard = () => {
                         date={ride.date}
                         time={ride.time}
                         status={ride.status}
-                        onCancel={updateRideStatus}
+                        onCancel={handleCancelRide}
                         onSchedule={handleSchedule}
                       />
                     </motion.div>
@@ -233,6 +243,8 @@ const Dashboard = () => {
                       date={ride.date}
                       time={ride.time}
                       status={ride.status}
+                      onCancel={handleCancelRide}
+                      onSchedule={handleSchedule}
                     />
                   </motion.div>
                 ))}
@@ -268,6 +280,8 @@ const Dashboard = () => {
                       date={ride.date}
                       time={ride.time}
                       status={ride.status}
+                      onCancel={handleCancelRide}
+                      onSchedule={handleSchedule}
                     />
                   </motion.div>
                 ))}
@@ -302,6 +316,8 @@ const Dashboard = () => {
                       date={ride.date}
                       time={ride.time}
                       status={ride.status}
+                      onCancel={handleCancelRide}
+                      onSchedule={handleSchedule}
                     />
                   </motion.div>
                 ))}

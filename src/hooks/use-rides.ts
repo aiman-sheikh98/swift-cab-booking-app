@@ -1,7 +1,8 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import type { RideStatus } from '@/components/RideCard';
+
+export type RideStatus = 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
 
 export interface Ride {
   id: string;

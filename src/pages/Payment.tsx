@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CreditCard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
 
 const Payment = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const Payment = () => {
     expiry: '',
     cvc: ''
   });
+  const [upiId, setUpiId] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,31 +38,28 @@ const Payment = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      toast.success("Payment method added successfully!");
-      navigate('/book');
+      toast.success("Payment successful!");
+      navigate('/rides');
     } catch (error) {
       toast.error("Payment processing failed. Please try again.");
     } finally {
       setIsProcessing(false);
     }
   };
-
-  // In a real app, this would be connected to Stripe Elements
-  // For simplicity, we're using basic form inputs
   
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Payment Methods</h1>
-          <p className="text-slate-500 mb-8">Add or manage your payment options</p>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Complete Payment</h1>
+          <p className="text-slate-500 mb-8">Select your preferred payment method</p>
           
           <Card className="border-slate-200 animate-fade-in">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <CreditCard className="h-5 w-5 mr-2 text-swift-600" />
-                Add Payment Method
+                Payment Details
               </CardTitle>
               <CardDescription>
                 Your payment information is encrypted and secure
@@ -96,16 +95,14 @@ const Payment = () => {
                     <RadioGroupItem 
                       value="paypal" 
                       id="paypal" 
-                      className="peer sr-only" 
-                      disabled
+                      className="peer sr-only"
                     />
                     <Label
                       htmlFor="paypal"
-                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer opacity-50"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer peer-data-[state=checked]:border-swift-600 [&:has([data-state=checked])]:border-swift-600"
                     >
                       <svg className="h-6 w-6 mb-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M19.891 7.78C19.891 9.3709 19.1575 10.8538 17.9536 11.72C16.655 12.6623 14.9512 13 13.1642 13H11.9603C11.6921 13 11.4665 13.1854 11.3889 13.4438L10 18.9697H6.7145C6.3301 18.9697 6.0405 18.6327 6.0834 18.2513L8.2415 3.77643C8.30367 3.31983 8.7029 2.98291 9.16591 2.98291H14.0297C16.0386 2.98291 17.5767 3.35439 18.5499 4.08024C19.4516 4.75815 19.891 6.03339 19.891 7.78Z" stroke="currentColor" strokeWidth="2"/>
-                        <path d="M17.9977 8.78C17.9977 10.3709 17.2642 11.8538 16.0603 12.72C14.7617 13.6623 13.0579 14 11.2709 14H10.067C9.79879 14 9.57319 14.1854 9.4956 14.4438L8.1067 19.9697H4.8212C4.4368 19.9697 4.1472 19.6327 4.1901 19.2513L6.3482 4.77643C6.41037 4.31983 6.8096 3.98291 7.27261 3.98291H12.1364C14.1453 3.98291 15.6834 4.35439 16.6566 5.08024C17.5583 5.75815 17.9977 7.03339 17.9977 8.78Z" stroke="currentColor" strokeWidth="2"/>
                       </svg>
                       PayPal
                     </Label>
@@ -113,20 +110,20 @@ const Payment = () => {
                   
                   <div>
                     <RadioGroupItem 
-                      value="apple-pay" 
-                      id="apple-pay" 
+                      value="upi" 
+                      id="upi" 
                       className="peer sr-only" 
-                      disabled
                     />
                     <Label
-                      htmlFor="apple-pay"
-                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer opacity-50"
+                      htmlFor="upi"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer peer-data-[state=checked]:border-swift-600 [&:has([data-state=checked])]:border-swift-600"
                     >
                       <svg className="h-6 w-6 mb-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M17.04 12.3828C17.0176 10.5664 18.4922 9.67969 18.5508 9.64062C17.7266 8.44531 16.4805 8.28125 16.043 8.26562C14.9648 8.15625 13.9219 8.89062 13.3711 8.89062C12.8047 8.89062 11.9531 8.27344 11.0586 8.29688C9.9102 8.32031 8.84766 8.95312 8.25 9.9375C7.01562 11.9297 7.91016 14.9141 9.09766 16.6875C9.69531 17.5547 10.3984 18.5273 11.3164 18.4844C12.2109 18.4375 12.5625 17.9102 13.6406 17.9102C14.7188 17.9102 15.0469 18.4844 15.9805 18.457C16.9375 18.4375 17.5469 17.5703 18.1328 16.6953C18.8086 15.6992 19.0859 14.7188 19.1016 14.6836C19.0859 14.6719 17.0664 13.9336 17.04 12.3828Z" stroke="currentColor" strokeWidth="2"/>
-                        <path d="M15.5859 7.03125C16.0703 6.4375 16.3984 5.64062 16.3125 4.82812C15.6367 4.85938 14.7852 5.29688 14.2773 5.87109C13.8281 6.37109 13.4336 7.19531 13.5352 7.97656C14.291 8.04297 15.0859 7.61328 15.5859 7.03125Z" stroke="currentColor" strokeWidth="2"/>
+                        <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2"/>
+                        <path d="M7.5 8.5L16.5 15.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        <path d="M16.5 8.5L7.5 15.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                       </svg>
-                      Apple Pay
+                      UPI
                     </Label>
                   </div>
                 </RadioGroup>
@@ -182,6 +179,43 @@ const Payment = () => {
                     </div>
                   </div>
                 )}
+
+                {paymentMethod === 'paypal' && (
+                  <div className="space-y-4 mt-6 animate-fade-in">
+                    <div className="rounded-lg bg-blue-50 p-4 text-center">
+                      <p className="text-blue-800 mb-4">You'll be redirected to PayPal to complete your payment securely.</p>
+                      <div className="flex justify-center">
+                        <img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png" alt="PayPal" className="h-8" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {paymentMethod === 'upi' && (
+                  <div className="space-y-4 mt-6 animate-fade-in">
+                    <div className="space-y-2">
+                      <Label htmlFor="upiId">UPI ID</Label>
+                      <Input 
+                        id="upiId"
+                        placeholder="yourname@upi"
+                        value={upiId}
+                        onChange={(e) => setUpiId(e.target.value)}
+                        required
+                      />
+                      <p className="text-sm text-muted-foreground">Enter your UPI ID (e.g. name@bank)</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {['GPay', 'PhonePe', 'Paytm', 'BHIM'].map(app => (
+                        <div key={app} className="flex flex-col items-center p-3 border rounded-md">
+                          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-1">
+                            <span className="text-xs">{app.charAt(0)}</span>
+                          </div>
+                          <span className="text-xs">{app}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </form>
             </CardContent>
             <CardFooter>
@@ -190,13 +224,13 @@ const Payment = () => {
                 className="w-full bg-swift-600 hover:bg-swift-700"
                 disabled={isProcessing}
               >
-                {isProcessing ? "Processing..." : "Add Payment Method"}
+                {isProcessing ? "Processing..." : `Pay Now`}
               </Button>
             </CardFooter>
           </Card>
           
           <div className="mt-6 text-center text-xs text-slate-500">
-            <p>Payment processing is handled securely by Stripe</p>
+            <p>Payment processing is handled securely</p>
             <p className="mt-2">This is a demo application. No real payments are processed.</p>
           </div>
         </div>

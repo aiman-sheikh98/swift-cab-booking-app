@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -13,6 +12,8 @@ import { format } from "date-fns";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Ride, RideStatus } from '@/hooks/use-rides';
+import { PaymentAnimation } from '../payment/PaymentAnimation';
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface BookingFormProps {
   vehicleType: string;
@@ -31,6 +32,8 @@ export const BookingForm: React.FC<BookingFormProps> = ({
   const [time, setTime] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [isPaymentComplete, setIsPaymentComplete] = useState(false);
   const { getSuggestion, isLoading: isSuggestingLocation } = useLocationSuggestions();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -45,15 +48,29 @@ export const BookingForm: React.FC<BookingFormProps> = ({
     }
   };
 
-  const handleBooking = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const processPayment = async () => {
+    setShowPaymentDialog(true);
+    setIsPaymentComplete(false);
+    
+    // Simulate payment processing
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsPaymentComplete(true);
+    
+    // Wait a moment to show success animation
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setShowPaymentDialog(false);
+    
+    // Proceed with booking
+    handleBooking();
+  };
 
+  const handleBooking = async () => {
     if (!pickupLocation || !dropoffLocation || !date || !time) {
       toast.error("Please fill in all required fields");
-      setIsLoading(false);
       return;
     }
+
+    setIsLoading(true);
 
     try {
       const { error } = await supabase
@@ -70,8 +87,6 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       if (error) throw error;
       
       toast.success("Ride booked successfully!");
-      
-      // Navigate to payment page which will then redirect to rides
       navigate('/');
     } catch (error) {
       toast.error("Failed to book your ride. Please try again.");
@@ -82,7 +97,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleBooking} className="space-y-4">
+    <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); }}>
       <LocationInput
         id="pickup"
         label="Pickup Location"
@@ -173,15 +188,29 @@ export const BookingForm: React.FC<BookingFormProps> = ({
 
       <PriceSummary vehicleType={vehicleType as 'economy' | 'standard' | 'premium'} />
 
-      <div className="space-y-4">
+      <div className="flex gap-4">
         <Button 
-          type="submit" 
-          className="w-full bg-swift-600 hover:bg-swift-700 text-white"
+          type="button"
+          className="flex-1 bg-swift-600 hover:bg-swift-700 text-white"
+          onClick={() => processPayment()}
           disabled={isLoading}
         >
           {isLoading ? "Processing..." : "Book Now"}
         </Button>
       </div>
+
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent className="sm:max-w-md">
+          <div className="grid gap-6 py-4">
+            <div className="flex flex-col items-center space-y-4">
+              <PaymentAnimation isComplete={isPaymentComplete} />
+              <p className="text-center font-medium">
+                {!isPaymentComplete ? "Processing payment..." : "Payment successful!"}
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </form>
   );
 };

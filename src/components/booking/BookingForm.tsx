@@ -171,7 +171,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         </RadioGroup>
       </div>
 
-      <PriceSummary />
+      <PriceSummary vehicleType={vehicleType as 'economy' | 'standard' | 'premium'} />
 
       <div className="space-y-4">
         <Button 

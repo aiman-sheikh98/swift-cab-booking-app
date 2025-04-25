@@ -1,85 +1,78 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Car, Plus, MapPin, CreditCard, Calendar } from "lucide-react";
-import RideCard, { RideStatus } from "./RideCard";
+import { Car, Plus, MapPin, CreditCard, Calendar, Locate } from "lucide-react";
+import RideCard from "./RideCard";
 import { Card, CardContent } from "@/components/ui/card";
-import { motion } from "framer-motion";
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-interface Ride {
-  id: string;
-  pickupLocation: string;
-  dropoffLocation: string;
-  date: string;
-  time: string;
-  status: RideStatus;
-}
-
-const mockRides: Ride[] = [
-  {
-    id: '1287',
-    pickupLocation: 'Office HQ, 123 Business Park',
-    dropoffLocation: 'Downtown Conference Center',
-    date: 'Apr 26, 2025',
-    time: '9:30 AM',
-    status: 'scheduled',
-  },
-  {
-    id: '1286',
-    pickupLocation: 'Airport Terminal A',
-    dropoffLocation: 'Grand Hotel',
-    date: 'Apr 25, 2025',
-    time: '2:15 PM',
-    status: 'completed',
-  },
-  {
-    id: '1285',
-    pickupLocation: 'Corporate Tower, 45 Main St',
-    dropoffLocation: 'Tech Campus Building B',
-    date: 'Apr 25, 2025',
-    time: '11:00 AM',
-    status: 'in-progress',
-  },
-  {
-    id: '1284',
-    pickupLocation: 'City Center Mall',
-    dropoffLocation: 'Research Park',
-    date: 'Apr 24, 2025',
-    time: '4:45 PM',
-    status: 'cancelled',
-  },
-];
-
-const QuickRideOption = ({ icon, title, description, onClick }: { 
-  icon: React.ReactNode, 
-  title: string, 
-  description: string,
-  onClick: () => void
-}) => (
-  <div 
-    className="relative group cursor-pointer" 
-    onClick={onClick}
-  >
-    <div className="absolute -inset-0.5 bg-gradient-to-r from-swift-500 to-swift-300 rounded-lg blur opacity-25 group-hover:opacity-70 transition duration-300"></div>
-    <div className="relative bg-white p-6 rounded-lg border border-slate-200 group-hover:shadow-lg transition-all duration-300">
-      <div className="flex items-center gap-4">
-        <div className="rounded-full bg-swift-50 p-3 text-swift-600 group-hover:bg-swift-100 transition-colors">
-          {icon}
-        </div>
-        <div>
-          <h3 className="font-medium text-lg text-slate-900">{title}</h3>
-          <p className="text-sm text-slate-500">{description}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-);
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { Ride } from '@/hooks/use-rides';
 
 const Dashboard = () => {
-  const [rides, setRides] = useState<Ride[]>(mockRides);
+  const [rides, setRides] = useState<Ride[]>([]);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  useEffect(() => {
+    const fetchRides = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('rides')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching rides:', error);
+        return;
+      }
+
+      setRides(data.map(ride => ({
+        id: ride.id,
+        pickupLocation: ride.pickup_location,
+        dropoffLocation: ride.dropoff_location,
+        date: ride.date,
+        time: ride.time,
+        status: ride.status
+      })));
+    };
+
+    fetchRides();
+
+    const channel = supabase
+      .channel('rides')
+      .on(
+        'postgres_changes',
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'rides',
+          filter: `user_id=eq.${user?.id}`
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setRides(prevRides => [
+              {
+                id: payload.new.id,
+                pickupLocation: payload.new.pickup_location,
+                dropoffLocation: payload.new.dropoff_location,
+                date: payload.new.date,
+                time: payload.new.time,
+                status: payload.new.status
+              },
+              ...prevRides
+            ]);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
   
   // Stats for the overview cards
   const totalRides = rides.length;
@@ -304,3 +297,28 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+const QuickRideOption = ({ icon, title, description, onClick }: { 
+  icon: React.ReactNode, 
+  title: string, 
+  description: string,
+  onClick: () => void
+}) => (
+  <div 
+    className="relative group cursor-pointer" 
+    onClick={onClick}
+  >
+    <div className="absolute -inset-0.5 bg-gradient-to-r from-swift-500 to-swift-300 rounded-lg blur opacity-25 group-hover:opacity-70 transition duration-300"></div>
+    <div className="relative bg-white p-6 rounded-lg border border-slate-200 group-hover:shadow-lg transition-all duration-300">
+      <div className="flex items-center gap-4">
+        <div className="rounded-full bg-swift-50 p-3 text-swift-600 group-hover:bg-swift-100 transition-colors">
+          {icon}
+        </div>
+        <div>
+          <h3 className="font-medium text-lg text-slate-900">{title}</h3>
+          <p className="text-sm text-slate-500">{description}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);

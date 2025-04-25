@@ -52,6 +52,11 @@ export const BookingForm: React.FC<BookingFormProps> = ({
     }
 
     try {
+      // Generate estimated arrival time (30 mins after booking)
+      const estimatedArrivalTime = new Date(date);
+      const [hours, minutes] = time.split(':').map(Number);
+      estimatedArrivalTime.setHours(hours, minutes + 30);
+
       const { error } = await supabase
         .from('rides')
         .insert({
@@ -60,7 +65,10 @@ export const BookingForm: React.FC<BookingFormProps> = ({
           date: format(date, "MMM dd, yyyy"),
           time: time,
           status: 'scheduled',
-          user_id: user?.id
+          user_id: user?.id,
+          current_location_lat: null,  // Will be updated during ride
+          current_location_lng: null,  // Will be updated during ride
+          estimated_arrival_time: estimatedArrivalTime.toISOString()
         });
 
       if (error) throw error;
@@ -69,6 +77,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       navigate('/rides');
     } catch (error) {
       toast.error("Failed to book your ride. Please try again.");
+      console.error(error);
     } finally {
       setIsLoading(false);
     }

@@ -1,23 +1,12 @@
-
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Calendar, Clock, Car } from "lucide-react";
 import { RideActions } from './booking/RideActions';
 import { motion } from "framer-motion";
+import { RIDE_PRICING } from '@/config/pricing';
 
 export type RideStatus = 'scheduled' | 'completed' | 'cancelled' | 'in-progress';
-
-interface RideCardProps {
-  id: string;
-  pickupLocation: string;
-  dropoffLocation: string;
-  date: string;
-  time: string;
-  status: RideStatus;
-  onCancel?: (rideId: string) => Promise<void>;
-  onSchedule?: (rideId: string) => void;
-}
 
 const statusConfig = {
   'scheduled': { color: 'bg-blue-100 text-blue-800 hover:bg-blue-100', label: 'Scheduled' },
@@ -26,17 +15,31 @@ const statusConfig = {
   'in-progress': { color: 'bg-amber-100 text-amber-800 hover:bg-amber-100', label: 'In Progress' }
 };
 
+interface RideCardProps {
+  id: string;
+  pickupLocation: string;
+  dropoffLocation: string;
+  date: string;
+  time: string;
+  status: RideStatus;
+  vehicleType?: 'economy' | 'standard' | 'premium';
+  onCancel?: (rideId: string) => Promise<void>;
+  onSchedule?: (rideId: string) => void;
+}
+
 const RideCard = ({ 
   id, 
   pickupLocation, 
   dropoffLocation, 
   date, 
   time, 
-  status, 
+  status,
+  vehicleType = 'standard',
   onCancel,
   onSchedule 
 }: RideCardProps) => {
   const statusInfo = statusConfig[status];
+  const pricing = RIDE_PRICING[vehicleType];
   
   return (
     <Card className="hover:shadow-md transition-all duration-300 border-slate-200 hover:border-swift-200 group">
@@ -79,16 +82,19 @@ const RideCard = ({
               </div>
             </div>
           </div>
-          
-          <Badge 
-            variant="outline" 
-            className={`${statusInfo.color} border-none whitespace-nowrap transition-transform group-hover:scale-110`}
-          >
-            {statusInfo.label}
-          </Badge>
+          <div className="flex flex-col items-end gap-2">
+            <Badge 
+              variant="outline" 
+              className={`${statusInfo.color} border-none whitespace-nowrap transition-transform group-hover:scale-110`}
+            >
+              {statusInfo.label}
+            </Badge>
+            <span className="text-lg font-semibold text-swift-600">
+              ${pricing.minPrice}
+            </span>
+          </div>
         </div>
         
-        {/* Progress Bar for in-progress rides */}
         {status === 'in-progress' && (
           <div className="mt-4">
             <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
@@ -105,7 +111,7 @@ const RideCard = ({
           <RideActions
             rideId={id}
             status={status}
-            onCancel={onCancel!}
+            onCancel={onCancel}
             onSchedule={onSchedule}
           />
         )}

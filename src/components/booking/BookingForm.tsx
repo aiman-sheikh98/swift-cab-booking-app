@@ -12,9 +12,7 @@ import { PriceSummary } from './PriceSummary';
 import { format } from "date-fns";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-
-// Define RideStatus type and export it since it's missing from use-rides
-export type RideStatus = 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+import { Ride, RideStatus } from '@/hooks/use-rides';
 
 interface BookingFormProps {
   vehicleType: string;
@@ -58,11 +56,6 @@ export const BookingForm: React.FC<BookingFormProps> = ({
     }
 
     try {
-      // Generate estimated arrival time (30 mins after booking)
-      const estimatedArrivalTime = new Date(date);
-      const [hours, minutes] = time.split(':').map(Number);
-      estimatedArrivalTime.setHours(hours, minutes + 30);
-
       const { error } = await supabase
         .from('rides')
         .insert({
@@ -70,10 +63,8 @@ export const BookingForm: React.FC<BookingFormProps> = ({
           dropoff_location: dropoffLocation,
           date: format(date, "MMM dd, yyyy"),
           time: time,
-          status: 'scheduled',
-          user_id: user?.id,
-          estimated_arrival_time: estimatedArrivalTime.toISOString()
-          // Remove the current_location_lat and current_location_lng fields since they're causing issues
+          status: 'scheduled' as RideStatus,
+          user_id: user?.id
         });
 
       if (error) throw error;
@@ -81,7 +72,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       toast.success("Ride booked successfully!");
       
       // Navigate to payment page which will then redirect to rides
-      navigate('/payment');
+      navigate('/');
     } catch (error) {
       toast.error("Failed to book your ride. Please try again.");
       console.error(error);
@@ -185,7 +176,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       <div className="space-y-4">
         <Button 
           type="submit" 
-          className="w-full bg-swift-600 hover:bg-swift-700"
+          className="w-full bg-swift-600 hover:bg-swift-700 text-white"
           disabled={isLoading}
         >
           {isLoading ? "Processing..." : "Book Now"}

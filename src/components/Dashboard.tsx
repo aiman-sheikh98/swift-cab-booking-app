@@ -9,9 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Ride, RideStatus } from '@/hooks/use-rides';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Dashboard = () => {
   const [rides, setRides] = useState<Ride[]>([]);
+  const [newBookingId, setNewBookingId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
   
@@ -54,17 +56,22 @@ const Dashboard = () => {
         },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            setRides(prevRides => [
-              {
-                id: payload.new.id,
-                pickupLocation: payload.new.pickup_location,
-                dropoffLocation: payload.new.dropoff_location,
-                date: payload.new.date,
-                time: payload.new.time,
-                status: payload.new.status as RideStatus
-              },
-              ...prevRides
-            ]);
+            const newRide = {
+              id: payload.new.id,
+              pickupLocation: payload.new.pickup_location,
+              dropoffLocation: payload.new.dropoff_location,
+              date: payload.new.date,
+              time: payload.new.time,
+              status: payload.new.status as RideStatus
+            };
+            
+            setRides(prevRides => [newRide, ...prevRides]);
+            setNewBookingId(newRide.id);
+            
+            // Reset the highlighted booking after 5 seconds
+            setTimeout(() => {
+              setNewBookingId(null);
+            }, 5000);
           }
         }
       )
@@ -126,63 +133,33 @@ const Dashboard = () => {
       
       {/* Stats overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="rounded-full bg-swift-100 p-3">
-                <Car className="h-6 w-6 text-swift-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Total Rides</p>
-                <h3 className="text-2xl font-bold text-slate-900">{totalRides}</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="rounded-full bg-green-100 p-3">
-                <Car className="h-6 w-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Completed</p>
-                <h3 className="text-2xl font-bold text-slate-900">{completedRides}</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="rounded-full bg-blue-100 p-3">
-                <Car className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Scheduled</p>
-                <h3 className="text-2xl font-bold text-slate-900">{scheduledRides}</h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="rounded-full bg-amber-100 p-3">
-                <Car className="h-6 w-6 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">In Progress</p>
-                <h3 className="text-2xl font-bold text-slate-900">
-                  {rides.filter(ride => ride.status === 'in-progress').length}
-                </h3>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {[
+          { icon: <Car className="h-6 w-6 text-swift-600" />, title: "Total Rides", value: totalRides, color: "bg-swift-100" },
+          { icon: <Car className="h-6 w-6 text-green-600" />, title: "Completed", value: completedRides, color: "bg-green-100" },
+          { icon: <Car className="h-6 w-6 text-blue-600" />, title: "Scheduled", value: scheduledRides, color: "bg-blue-100" },
+          { icon: <Car className="h-6 w-6 text-amber-600" />, title: "In Progress", value: rides.filter(ride => ride.status === 'in-progress').length, color: "bg-amber-100" }
+        ].map((stat, index) => (
+          <motion.div 
+            key={stat.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: index * 0.1 }}
+          >
+            <Card className="h-full">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className={`rounded-full ${stat.color} p-3`}>
+                    {stat.icon}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">{stat.title}</p>
+                    <h3 className="text-2xl font-bold text-slate-900">{stat.value}</h3>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </div>
       
       {/* Recent rides with tabs */}
@@ -199,90 +176,149 @@ const Dashboard = () => {
           
           <TabsContent value="all" className="animate-fade-in">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {rides.map((ride, index) => (
-                <div key={ride.id} className="animate-fade-in" style={{ animationDelay: `${0.1 * index}s` }}>
-                  <RideCard
-                    id={ride.id}
-                    pickupLocation={ride.pickupLocation}
-                    dropoffLocation={ride.dropoffLocation}
-                    date={ride.date}
-                    time={ride.time}
-                    status={ride.status}
-                  />
-                </div>
-              ))}
+              <AnimatePresence>
+                {rides.map((ride, index) => (
+                  <motion.div 
+                    key={ride.id} 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    className={newBookingId === ride.id ? "animate-pulse" : ""}
+                  >
+                    <motion.div
+                      animate={newBookingId === ride.id ? { 
+                        boxShadow: ['0px 0px 0px rgba(0,0,0,0)', '0px 0px 20px rgba(16, 185, 129, 0.8)', '0px 0px 0px rgba(0,0,0,0)'],
+                        borderColor: ['#e2e8f0', '#10b981', '#e2e8f0']
+                      } : {}}
+                      transition={{ duration: 2, repeat: newBookingId === ride.id ? 2 : 0 }}
+                    >
+                      <RideCard
+                        id={ride.id}
+                        pickupLocation={ride.pickupLocation}
+                        dropoffLocation={ride.dropoffLocation}
+                        date={ride.date}
+                        time={ride.time}
+                        status={ride.status}
+                      />
+                    </motion.div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           </TabsContent>
           
           <TabsContent value="scheduled" className="animate-fade-in">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {rides.filter(r => r.status === 'scheduled').map((ride, index) => (
-                <div key={ride.id} className="animate-fade-in" style={{ animationDelay: `${0.1 * index}s` }}>
-                  <RideCard
-                    id={ride.id}
-                    pickupLocation={ride.pickupLocation}
-                    dropoffLocation={ride.dropoffLocation}
-                    date={ride.date}
-                    time={ride.time}
-                    status={ride.status}
-                  />
-                </div>
-              ))}
+              <AnimatePresence>
+                {rides.filter(r => r.status === 'scheduled').map((ride, index) => (
+                  <motion.div 
+                    key={ride.id} 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    className={newBookingId === ride.id ? "animate-pulse" : ""}
+                  >
+                    <RideCard
+                      id={ride.id}
+                      pickupLocation={ride.pickupLocation}
+                      dropoffLocation={ride.dropoffLocation}
+                      date={ride.date}
+                      time={ride.time}
+                      status={ride.status}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
               {rides.filter(r => r.status === 'scheduled').length === 0 && (
-                <div className="col-span-full text-center py-12 text-slate-500">
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="col-span-full text-center py-12 text-slate-500"
+                >
                   No scheduled rides found
-                </div>
+                </motion.div>
               )}
             </div>
           </TabsContent>
           
+          {/* In Progress and Completed tabs follow the same pattern */}
           <TabsContent value="in-progress" className="animate-fade-in">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {rides.filter(r => r.status === 'in-progress').map((ride, index) => (
-                <div key={ride.id} className="animate-fade-in" style={{ animationDelay: `${0.1 * index}s` }}>
-                  <RideCard
-                    id={ride.id}
-                    pickupLocation={ride.pickupLocation}
-                    dropoffLocation={ride.dropoffLocation}
-                    date={ride.date}
-                    time={ride.time}
-                    status={ride.status}
-                  />
-                </div>
-              ))}
+              <AnimatePresence>
+                {rides.filter(r => r.status === 'in-progress').map((ride, index) => (
+                  <motion.div 
+                    key={ride.id} 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                  >
+                    <RideCard
+                      id={ride.id}
+                      pickupLocation={ride.pickupLocation}
+                      dropoffLocation={ride.dropoffLocation}
+                      date={ride.date}
+                      time={ride.time}
+                      status={ride.status}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
               {rides.filter(r => r.status === 'in-progress').length === 0 && (
-                <div className="col-span-full text-center py-12 text-slate-500">
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="col-span-full text-center py-12 text-slate-500"
+                >
                   No rides in progress
-                </div>
+                </motion.div>
               )}
             </div>
           </TabsContent>
           
           <TabsContent value="completed" className="animate-fade-in">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {rides.filter(r => r.status === 'completed').map((ride, index) => (
-                <div key={ride.id} className="animate-fade-in" style={{ animationDelay: `${0.1 * index}s` }}>
-                  <RideCard
-                    id={ride.id}
-                    pickupLocation={ride.pickupLocation}
-                    dropoffLocation={ride.dropoffLocation}
-                    date={ride.date}
-                    time={ride.time}
-                    status={ride.status}
-                  />
-                </div>
-              ))}
+              <AnimatePresence>
+                {rides.filter(r => r.status === 'completed').map((ride, index) => (
+                  <motion.div 
+                    key={ride.id} 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                  >
+                    <RideCard
+                      id={ride.id}
+                      pickupLocation={ride.pickupLocation}
+                      dropoffLocation={ride.dropoffLocation}
+                      date={ride.date}
+                      time={ride.time}
+                      status={ride.status}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
               {rides.filter(r => r.status === 'completed').length === 0 && (
-                <div className="col-span-full text-center py-12 text-slate-500">
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="col-span-full text-center py-12 text-slate-500"
+                >
                   No completed rides found
-                </div>
+                </motion.div>
               )}
             </div>
           </TabsContent>
         </Tabs>
         
         {rides.length === 0 && (
-          <div className="text-center py-12">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-12"
+          >
             <p className="text-slate-500">You haven't booked any rides yet</p>
             <Button 
               className="mt-4 bg-swift-600 hover:bg-swift-700 text-white"
@@ -290,7 +326,7 @@ const Dashboard = () => {
             >
               Book Your First Ride
             </Button>
-          </div>
+          </motion.div>
         )}
       </div>
     </div>
@@ -305,9 +341,11 @@ const QuickRideOption = ({ icon, title, description, onClick }: {
   description: string,
   onClick: () => void
 }) => (
-  <div 
-    className="relative group cursor-pointer" 
+  <motion.div 
+    className="relative group cursor-pointer"
     onClick={onClick}
+    whileHover={{ scale: 1.03 }}
+    transition={{ duration: 0.2 }}
   >
     <div className="absolute -inset-0.5 bg-gradient-to-r from-swift-500 to-swift-300 rounded-lg blur opacity-25 group-hover:opacity-70 transition duration-300"></div>
     <div className="relative bg-white p-6 rounded-lg border border-slate-200 group-hover:shadow-lg transition-all duration-300">
@@ -321,5 +359,5 @@ const QuickRideOption = ({ icon, title, description, onClick }: {
         </div>
       </div>
     </div>
-  </div>
+  </motion.div>
 );

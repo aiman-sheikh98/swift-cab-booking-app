@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -10,6 +9,7 @@ import { LocationInput } from './LocationInput';
 import { DateTimePicker } from './DateTimePicker';
 import { PriceSummary } from './PriceSummary';
 import { format } from "date-fns";
+import { RideStatus } from '@/hooks/use-rides';
 
 interface BookingFormProps {
   vehicleType: string;
@@ -64,7 +64,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
           dropoff_location: dropoffLocation,
           date: format(date, "MMM dd, yyyy"),
           time: time,
-          status: 'scheduled',
+          status: 'scheduled' as RideStatus,
           user_id: user?.id,
           current_location_lat: null,  // Will be updated during ride
           current_location_lng: null,  // Will be updated during ride

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Car, Plus, MapPin, CreditCard, Calendar, Locate } from "lucide-react";
@@ -7,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { Ride } from '@/hooks/use-rides';
+import { Ride, RideStatus } from '@/hooks/use-rides';
 
 const Dashboard = () => {
   const [rides, setRides] = useState<Ride[]>([]);
@@ -35,7 +36,7 @@ const Dashboard = () => {
         dropoffLocation: ride.dropoff_location,
         date: ride.date,
         time: ride.time,
-        status: ride.status
+        status: ride.status as RideStatus
       })));
     };
 
@@ -60,7 +61,7 @@ const Dashboard = () => {
                 dropoffLocation: payload.new.dropoff_location,
                 date: payload.new.date,
                 time: payload.new.time,
-                status: payload.new.status
+                status: payload.new.status as RideStatus
               },
               ...prevRides
             ]);

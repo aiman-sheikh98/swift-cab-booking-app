@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ interface RideCardProps {
   time: string;
   status: RideStatus;
   vehicleType?: 'economy' | 'standard' | 'premium';
+  price?: number;
   onCancel?: (rideId: string) => Promise<void>;
   onSchedule?: (rideId: string) => void;
 }
@@ -35,11 +37,13 @@ const RideCard = ({
   time, 
   status,
   vehicleType = 'standard',
+  price,
   onCancel,
   onSchedule 
 }: RideCardProps) => {
   const statusInfo = statusConfig[status];
   const pricing = RIDE_PRICING[vehicleType];
+  const displayPrice = price || pricing.minPrice;
   
   return (
     <Card className="hover:shadow-md transition-all duration-300 border-slate-200 hover:border-swift-200 group">
@@ -90,7 +94,7 @@ const RideCard = ({
               {statusInfo.label}
             </Badge>
             <span className="text-lg font-semibold text-swift-600">
-              ${pricing.minPrice}
+              ${displayPrice?.toFixed(2)}
             </span>
           </div>
         </div>

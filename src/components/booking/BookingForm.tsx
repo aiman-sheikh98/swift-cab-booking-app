@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -13,7 +14,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Ride, RideStatus } from '@/hooks/use-rides';
 import { PaymentAnimation } from '../payment/PaymentAnimation';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { RIDE_PRICING } from '@/config/pricing';
 
 interface BookingFormProps {
   vehicleType: string;
@@ -72,6 +74,15 @@ export const BookingForm: React.FC<BookingFormProps> = ({
 
     setIsLoading(true);
 
+    // Calculate the price based on the selected vehicle type
+    const vehicleTypeFormatted = vehicleType.toLowerCase() as 'economy' | 'standard' | 'premium';
+    const pricing = RIDE_PRICING[vehicleTypeFormatted];
+    const baseFare = pricing.basePrice;
+    const distance = 10; // Default distance for demo
+    const distanceFare = pricing.pricePerKm * distance;
+    const serviceFee = Math.round(baseFare * 0.1);
+    const totalPrice = baseFare + distanceFare + serviceFee;
+
     try {
       const { error } = await supabase
         .from('rides')
@@ -81,7 +92,9 @@ export const BookingForm: React.FC<BookingFormProps> = ({
           date: format(date, "MMM dd, yyyy"),
           time: time,
           status: 'scheduled' as RideStatus,
-          user_id: user?.id
+          user_id: user?.id,
+          vehicle_type: vehicleTypeFormatted,
+          price: totalPrice
         });
 
       if (error) throw error;
@@ -201,6 +214,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
 
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
         <DialogContent className="sm:max-w-md">
+          <DialogTitle className="sr-only">Payment Processing</DialogTitle>
           <div className="grid gap-6 py-4">
             <div className="flex flex-col items-center space-y-4">
               <PaymentAnimation isComplete={isPaymentComplete} />

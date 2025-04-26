@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -51,6 +52,7 @@ const MyRides = () => {
             <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
             <TabsTrigger value="in-progress">In Progress</TabsTrigger>
             <TabsTrigger value="completed">Completed</TabsTrigger>
+            <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
           </TabsList>
           
           {isLoading ? (
@@ -108,6 +110,20 @@ const MyRides = () => {
                   )}
                 </div>
               </TabsContent>
+              
+              <TabsContent value="cancelled" className="animate-fade-in">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredRides('cancelled').length > 0 ? (
+                    filteredRides('cancelled').map(ride => (
+                      <RideCardWithActions key={ride.id} ride={ride} onCancel={handleCancelRide} showCancelAction={false} />
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-12">
+                      <p className="text-slate-500">No cancelled rides</p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
             </>
           )}
         </Tabs>
@@ -124,6 +140,8 @@ interface RideCardWithActionsProps {
     date: string;
     time: string;
     status: RideStatus;
+    vehicleType?: 'economy' | 'standard' | 'premium';
+    price?: number;
   };
   onCancel: (rideId: string) => void;
   showCancelAction?: boolean;
@@ -139,6 +157,8 @@ const RideCardWithActions: React.FC<RideCardWithActionsProps> = ({ ride, onCance
         date={ride.date}
         time={ride.time}
         status={ride.status}
+        vehicleType={ride.vehicleType}
+        price={ride.price}
       />
       
       {showCancelAction && ride.status === 'scheduled' && (

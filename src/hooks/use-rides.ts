@@ -11,6 +11,8 @@ export interface Ride {
   date: string;
   time: string;
   status: RideStatus;
+  vehicleType?: 'economy' | 'standard' | 'premium';
+  price?: number;
 }
 
 export const useRides = () => {
@@ -34,7 +36,9 @@ export const useRides = () => {
           dropoffLocation: ride.dropoff_location,
           date: ride.date,
           time: ride.time,
-          status: ride.status as RideStatus
+          status: ride.status as RideStatus,
+          vehicleType: ride.vehicle_type as 'economy' | 'standard' | 'premium',
+          price: ride.price
         })));
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch rides');

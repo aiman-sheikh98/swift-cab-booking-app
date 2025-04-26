@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 
 export type RideStatus = 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+export type VehicleType = 'economy' | 'standard' | 'premium';
 
 export interface Ride {
   id: string;
@@ -11,8 +12,9 @@ export interface Ride {
   date: string;
   time: string;
   status: RideStatus;
-  vehicleType?: 'economy' | 'standard' | 'premium';
-  price?: number;
+  vehicleType: VehicleType;
+  price: number;
+  userId: string;
 }
 
 export const useRides = () => {
@@ -37,8 +39,9 @@ export const useRides = () => {
           date: ride.date,
           time: ride.time,
           status: ride.status as RideStatus,
-          vehicleType: ride.vehicle_type as 'economy' | 'standard' | 'premium',
-          price: ride.price
+          vehicleType: (ride.vehicle_type || 'standard') as VehicleType,
+          price: Number(ride.price || 0),
+          userId: ride.user_id
         })));
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch rides');

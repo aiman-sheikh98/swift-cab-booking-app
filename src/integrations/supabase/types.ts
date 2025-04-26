@@ -43,10 +43,12 @@ export type Database = {
           dropoff_location: string
           id: string
           pickup_location: string
+          price: number | null
           status: string
           time: string
           updated_at: string
           user_id: string
+          vehicle_type: string | null
         }
         Insert: {
           created_at?: string
@@ -54,10 +56,12 @@ export type Database = {
           dropoff_location: string
           id?: string
           pickup_location: string
+          price?: number | null
           status?: string
           time: string
           updated_at?: string
           user_id: string
+          vehicle_type?: string | null
         }
         Update: {
           created_at?: string
@@ -65,10 +69,12 @@ export type Database = {
           dropoff_location?: string
           id?: string
           pickup_location?: string
+          price?: number | null
           status?: string
           time?: string
           updated_at?: string
           user_id?: string
+          vehicle_type?: string | null
         }
         Relationships: []
       }

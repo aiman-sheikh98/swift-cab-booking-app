@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import Header from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { BookingDetailsCard } from '@/components/booking/BookingDetailsCard';
 import { MapSection } from '@/components/booking/MapSection';
 import { VehicleSelectionCard } from '@/components/booking/VehicleSelectionCard';
@@ -21,7 +22,7 @@ const BookRide = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Header />
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 flex-1">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <div>
@@ -50,6 +51,7 @@ const BookRide = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

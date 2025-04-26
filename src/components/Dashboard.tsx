@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { Ride, RideStatus, useRides } from '@/hooks/use-rides';
+import { Ride, RideStatus, VehicleType, useRides } from '@/hooks/use-rides';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 
@@ -39,7 +39,10 @@ const Dashboard = () => {
         dropoffLocation: ride.dropoff_location,
         date: ride.date,
         time: ride.time,
-        status: ride.status as RideStatus
+        status: ride.status as RideStatus,
+        vehicleType: (ride.vehicle_type || 'standard') as VehicleType,
+        price: Number(ride.price || 0),
+        userId: ride.user_id
       })));
     };
 
@@ -63,7 +66,10 @@ const Dashboard = () => {
               dropoffLocation: payload.new.dropoff_location,
               date: payload.new.date,
               time: payload.new.time,
-              status: payload.new.status as RideStatus
+              status: payload.new.status as RideStatus,
+              vehicleType: (payload.new.vehicle_type || 'standard') as VehicleType,
+              price: Number(payload.new.price || 0),
+              userId: payload.new.user_id
             };
             
             setRides(prevRides => [newRide, ...prevRides]);

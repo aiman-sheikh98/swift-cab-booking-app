@@ -88,12 +88,13 @@ const Dashboard = () => {
       supabase.removeChannel(channel);
     };
   }, [user]);
-  
-  // Stats for the overview cards
+
+  // Stats calculations including cancelled rides
   const totalRides = rides.length;
   const completedRides = rides.filter(ride => ride.status === 'completed').length;
   const scheduledRides = rides.filter(ride => ride.status === 'scheduled').length;
-  
+  const cancelledRides = rides.filter(ride => ride.status === 'cancelled').length;
+
   const handleBookRide = () => {
     navigate('/book');
   };
@@ -157,7 +158,7 @@ const Dashboard = () => {
           { icon: <Car className="h-6 w-6 text-swift-600" />, title: "Total Rides", value: totalRides, color: "bg-swift-100" },
           { icon: <Car className="h-6 w-6 text-green-600" />, title: "Completed", value: completedRides, color: "bg-green-100" },
           { icon: <Car className="h-6 w-6 text-blue-600" />, title: "Scheduled", value: scheduledRides, color: "bg-blue-100" },
-          { icon: <Car className="h-6 w-6 text-amber-600" />, title: "In Progress", value: rides.filter(ride => ride.status === 'in-progress').length, color: "bg-amber-100" }
+          { icon: <Car className="h-6 w-6 text-red-600" />, title: "Cancelled", value: cancelledRides, color: "bg-red-100" }
         ].map((stat, index) => (
           <motion.div 
             key={stat.title}
@@ -192,6 +193,7 @@ const Dashboard = () => {
             <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
             <TabsTrigger value="in-progress">In Progress</TabsTrigger>
             <TabsTrigger value="completed">Completed</TabsTrigger>
+            <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
           </TabsList>
           
           <TabsContent value="all" className="animate-fade-in">
@@ -220,6 +222,8 @@ const Dashboard = () => {
                         date={ride.date}
                         time={ride.time}
                         status={ride.status}
+                        vehicleType={ride.vehicleType}
+                        price={ride.price}
                         onCancel={handleCancelRide}
                         onSchedule={handleSchedule}
                       />
@@ -249,6 +253,8 @@ const Dashboard = () => {
                       date={ride.date}
                       time={ride.time}
                       status={ride.status}
+                      vehicleType={ride.vehicleType}
+                      price={ride.price}
                       onCancel={handleCancelRide}
                       onSchedule={handleSchedule}
                     />
@@ -286,6 +292,8 @@ const Dashboard = () => {
                       date={ride.date}
                       time={ride.time}
                       status={ride.status}
+                      vehicleType={ride.vehicleType}
+                      price={ride.price}
                       onCancel={handleCancelRide}
                       onSchedule={handleSchedule}
                     />
@@ -322,6 +330,8 @@ const Dashboard = () => {
                       date={ride.date}
                       time={ride.time}
                       status={ride.status}
+                      vehicleType={ride.vehicleType}
+                      price={ride.price}
                       onCancel={handleCancelRide}
                       onSchedule={handleSchedule}
                     />
@@ -335,6 +345,44 @@ const Dashboard = () => {
                   className="col-span-full text-center py-12 text-slate-500"
                 >
                   No completed rides found
+                </motion.div>
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="cancelled" className="animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <AnimatePresence>
+                {rides.filter(r => r.status === 'cancelled').map((ride, index) => (
+                  <motion.div 
+                    key={ride.id} 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                  >
+                    <RideCard
+                      id={ride.id}
+                      pickupLocation={ride.pickupLocation}
+                      dropoffLocation={ride.dropoffLocation}
+                      date={ride.date}
+                      time={ride.time}
+                      status={ride.status}
+                      vehicleType={ride.vehicleType}
+                      price={ride.price}
+                      onCancel={handleCancelRide}
+                      onSchedule={handleSchedule}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+              {rides.filter(r => r.status === 'cancelled').length === 0 && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="col-span-full text-center py-12 text-slate-500"
+                >
+                  No cancelled rides found
                 </motion.div>
               )}
             </div>
@@ -360,8 +408,6 @@ const Dashboard = () => {
     </div>
   );
 };
-
-export default Dashboard;
 
 const QuickRideOption = ({ icon, title, description, onClick }: { 
   icon: React.ReactNode, 
@@ -389,3 +435,5 @@ const QuickRideOption = ({ icon, title, description, onClick }: {
     </div>
   </motion.div>
 );
+
+export default Dashboard;

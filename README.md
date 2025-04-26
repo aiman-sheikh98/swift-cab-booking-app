@@ -1,18 +1,43 @@
 # Welcome to your Lovable project
 
 ## Project info
+🚖 Swift - Cab Booking App
+Swift is a modern and user-friendly cab booking app designed to make urban transportation simple, fast, and reliable. Whether you're commuting to work, catching a flight, or heading out for an adventure, Swift ensures you reach your destination conveniently with just a few taps.
 
-**URL**: https://lovable.dev/projects/4a11d98a-9829-448b-89b3-d2c034220340
+Swift is inspired by popular ride-hailing platforms like Uber and Lyft but tailored with a smooth, lightweight experience focused on speed and simplicity.
+
+User Side
+User Registration/Login (Email, Mobile OTP)
+
+Profile Management
+
+Real-Time Ride Booking
+
+Live Driver Tracking on Map
+
+Pickup & Drop-off Location Selection
+
+Fare Estimation Before Booking
+
+Multiple Payment Options (Card, Wallet, Cash)
+
+Ride History (Past and Upcoming rides)
+
+Live Ride Status (Searching Driver, Driver En Route, Ride in Progress, Completed)
+
+In-App Notifications (Push notifications for ride updates)
+
+Cancel Ride Option (with possible cancellation charges)
+
+Ratings & Reviews for Drivers
+
+In-app Chat/Call with Driver
 
 ## How can I edit this code?
 
 There are several ways of editing your application.
 
-**Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4a11d98a-9829-448b-89b3-d2c034220340) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
 
 **Use your preferred IDE**
 
@@ -24,13 +49,13 @@ Follow these steps:
 
 ```sh
 # Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+https://github.com/aiman-sheikh98/cab-dash-control.git
 
 # Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+cd swift-cab-booking-app
 
 # Step 3: Install the necessary dependencies.
-npm i
+npm install
 
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
@@ -62,9 +87,9 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/4a11d98a-9829-448b-89b3-d2c034220340) and click on Share -> Publish.
+Simply open copy the link  and click on Share -> Publish.
 
-## Can I connect a custom domain to my Lovable project?
+## Can I connect a custom domain to my  project?
 
 Yes, you can!
 

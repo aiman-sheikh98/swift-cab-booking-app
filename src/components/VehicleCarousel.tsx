@@ -48,6 +48,14 @@ export const VehicleCarousel: React.FC<VehicleCarouselProps> = ({ selectedVehicl
       description: 'Luxury vehicles with premium features',
       price: 'From $40',
       eta: '8 min away'
+    },
+    {
+      id: 'superbike',
+      name: 'Superbike',
+      image: 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?q=80&w=500',
+      description: 'High-performance motorcycles for thrilling rides',
+      price: 'From $35',
+      eta: '2 min away'
     }
   ];
 
@@ -94,3 +102,4 @@ export const VehicleCarousel: React.FC<VehicleCarouselProps> = ({ selectedVehicl
     </Carousel>
   );
 };
+

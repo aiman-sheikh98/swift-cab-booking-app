@@ -14,5 +14,11 @@ export const RIDE_PRICING = {
     basePrice: 40,
     pricePerKm: 2.5,
     minPrice: 40
+  },
+  superbike: {
+    basePrice: 35,
+    pricePerKm: 2.2,
+    minPrice: 35
   }
 };
+

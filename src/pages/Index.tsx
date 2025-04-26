@@ -1,16 +1,12 @@
-
 import React from 'react';
 import Header from '@/components/Header';
 import Dashboard from '@/components/Dashboard';
 import { ArrowRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useNavigate } from 'react-router-dom';
-
 const Index = () => {
   const navigate = useNavigate();
-
-  return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+  return <div className="min-h-screen bg-slate-50 flex flex-col">
       <Header />
       
       {/* Hero Section */}
@@ -32,21 +28,12 @@ const Index = () => {
               </p>
               
               <div className="flex gap-4 pt-4 animate-fade-in [--animation-delay:600ms]">
-                <Button 
-                  size="lg"
-                  onClick={() => navigate('/book')}
-                  className="bg-swift-600 hover:bg-swift-700 text-white"
-                >
+                <Button size="lg" onClick={() => navigate('/book')} className="bg-swift-600 hover:bg-swift-700 text-white">
                   Book a Ride
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 
-                <Button 
-                  size="lg"
-                  variant="outline"
-                  onClick={() => navigate('/support')}
-                  className="text-white border-white hover:bg-white/10"
-                >
+                <Button size="lg" variant="outline" onClick={() => navigate('/support')} className="border-white text-gray-100 bg-emerald-700 hover:bg-emerald-600">
                   Contact Support
                 </Button>
               </div>
@@ -82,8 +69,6 @@ const Index = () => {
       <main className="flex-1">
         <Dashboard />
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;

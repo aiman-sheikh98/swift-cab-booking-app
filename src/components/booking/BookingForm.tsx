@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -13,9 +12,6 @@ import { format } from "date-fns";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Ride, RideStatus } from '@/hooks/use-rides';
-import { PaymentAnimation } from '../payment/PaymentAnimation';
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { RIDE_PRICING } from '@/config/pricing';
 
 interface BookingFormProps {
   vehicleType: string;
@@ -34,8 +30,6 @@ export const BookingForm: React.FC<BookingFormProps> = ({
   const [time, setTime] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [isPaymentComplete, setIsPaymentComplete] = useState(false);
   const { getSuggestion, isLoading: isSuggestingLocation } = useLocationSuggestions();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -50,22 +44,6 @@ export const BookingForm: React.FC<BookingFormProps> = ({
     }
   };
 
-  const processPayment = async () => {
-    setShowPaymentDialog(true);
-    setIsPaymentComplete(false);
-    
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsPaymentComplete(true);
-    
-    // Wait a moment to show success animation
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setShowPaymentDialog(false);
-    
-    // Proceed with booking
-    handleBooking();
-  };
-
   const handleBooking = async () => {
     if (!pickupLocation || !dropoffLocation || !date || !time) {
       toast.error("Please fill in all required fields");
@@ -74,35 +52,37 @@ export const BookingForm: React.FC<BookingFormProps> = ({
 
     setIsLoading(true);
 
-    // Calculate the price based on the selected vehicle type
-    const vehicleTypeFormatted = vehicleType.toLowerCase() as 'economy' | 'standard' | 'premium';
-    const pricing = RIDE_PRICING[vehicleTypeFormatted];
-    const baseFare = pricing.basePrice;
-    const distance = 10; // Default distance for demo
-    const distanceFare = pricing.pricePerKm * distance;
-    const serviceFee = Math.round(baseFare * 0.1);
-    const totalPrice = baseFare + distanceFare + serviceFee;
-
     try {
-      const { error } = await supabase
-        .from('rides')
-        .insert({
-          pickup_location: pickupLocation,
-          dropoff_location: dropoffLocation,
+      const vehicleTypeFormatted = vehicleType.toLowerCase() as 'economy' | 'standard' | 'premium';
+      const pricing = RIDE_PRICING[vehicleTypeFormatted];
+      const baseFare = pricing.basePrice;
+      const distance = 10; // Default distance for demo
+      const distanceFare = pricing.pricePerKm * distance;
+      const serviceFee = Math.round(baseFare * 0.1);
+      const totalPrice = baseFare + distanceFare + serviceFee;
+
+      // Create Stripe checkout session
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          pickupLocation,
+          dropoffLocation,
           date: format(date, "MMM dd, yyyy"),
-          time: time,
-          status: 'scheduled' as RideStatus,
-          user_id: user?.id,
-          vehicle_type: vehicleTypeFormatted,
+          time,
+          vehicleType: vehicleTypeFormatted,
           price: totalPrice
-        });
+        },
+      });
 
       if (error) throw error;
-      
-      toast.success("Ride booked successfully!");
-      navigate('/');
+
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
     } catch (error) {
-      toast.error("Failed to book your ride. Please try again.");
+      toast.error("Failed to process payment. Please try again.");
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -205,26 +185,12 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         <Button 
           type="button"
           className="flex-1 bg-swift-600 hover:bg-swift-700 text-white"
-          onClick={() => processPayment()}
+          onClick={() => handleBooking()}
           disabled={isLoading}
         >
           {isLoading ? "Processing..." : "Book Now"}
         </Button>
       </div>
-
-      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogTitle className="sr-only">Payment Processing</DialogTitle>
-          <div className="grid gap-6 py-4">
-            <div className="flex flex-col items-center space-y-4">
-              <PaymentAnimation isComplete={isPaymentComplete} />
-              <p className="text-center font-medium">
-                {!isPaymentComplete ? "Processing payment..." : "Payment successful!"}
-              </p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </form>
   );
 };

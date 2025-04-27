@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Header from '@/components/Header';
 import { Button } from "@/components/ui/button";
@@ -173,7 +172,7 @@ const RideCardWithActions: React.FC<RideCardWithActionsProps> = ({ ride, onCance
               <AlertDialogHeader>
                 <AlertDialogTitle>Cancel this ride?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to cancel your ride? This action cannot be undone.
+                  Are you sure you want to cancel your ride? A refund will be processed according to our cancellation policy.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

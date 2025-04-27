@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Ride, RideStatus } from '@/hooks/use-rides';
+import { RIDE_PRICING } from '@/config/pricing';
 
 interface BookingFormProps {
   vehicleType: string;

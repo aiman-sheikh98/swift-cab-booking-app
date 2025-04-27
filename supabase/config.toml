@@ -1,1 +1,48 @@
+
 project_id = "ozsvlaqpgaosjcfenhco"
+# This line ^ confirms that this project has been connected to Supabase properly
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://localhost"
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+port = 54325
+
+[auth]
+enabled = true
+port = 54326
+
+[realtime]
+enabled = true
+port = 54327
+
+[functions]
+[functions.create-payment]
+verify_jwt = true
+[functions.verify-payment]
+verify_jwt = true
+[functions.suggest-locations]
+verify_jwt = true
+
+[local.secrets]
+OPENAI_API_KEY = "{{env.OPENAI_API_KEY}}"
+SUPABASE_URL = "{{env.SUPABASE_URL}}"
+SUPABASE_ANON_KEY = "{{env.SUPABASE_ANON_KEY}}"
+SUPABASE_SERVICE_ROLE_KEY = "{{env.SUPABASE_SERVICE_ROLE_KEY}}"
+SUPABASE_DB_URL = "{{env.SUPABASE_DB_URL}}"
+STRIPE_SECRET_KEY = "{{env.STRIPE_SECRET_KEY}}"

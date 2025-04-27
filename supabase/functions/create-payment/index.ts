@@ -16,7 +16,27 @@ serve(async (req) => {
 
   try {
     // Get ride details from request
-    const { pickupLocation, dropoffLocation, date, time, vehicleType, price } = await req.json();
+    const { 
+      pickupLocation, 
+      dropoffLocation, 
+      date, 
+      time, 
+      vehicleType, 
+      price,
+      userId,
+      email
+    } = await req.json();
+
+    // Validate required fields
+    if (!pickupLocation || !dropoffLocation || !date || !time || !vehicleType || !price) {
+      return new Response(
+        JSON.stringify({ error: "Missing required booking information" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
 
     // Initialize Stripe with the secret key from environment variables
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -31,8 +51,8 @@ serve(async (req) => {
           price_data: {
             currency: "usd",
             product_data: {
-              name: "Ride Booking",
-              description: `From ${pickupLocation} to ${dropoffLocation}`,
+              name: `${vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1)} Ride`,
+              description: `From ${pickupLocation} to ${dropoffLocation} on ${date} at ${time}`,
             },
             unit_amount: Math.round(price * 100), // Convert to cents
           },
@@ -40,19 +60,27 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: `${req.headers.get("origin")}/rides?success=true`,
-      cancel_url: `${req.headers.get("origin")}/book`,
+      success_url: `${req.headers.get("origin")}/payment?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.get("origin")}/payment?canceled=true`,
+      customer_email: email, // Pre-fill customer email if available
       metadata: {
+        userId,
         pickupLocation,
         dropoffLocation,
         date,
         time,
         vehicleType,
+        price: price.toString(),
       },
     });
 
+    console.log("Stripe checkout session created:", session.id);
+
     return new Response(
-      JSON.stringify({ sessionId: session.id, url: session.url }),
+      JSON.stringify({ 
+        sessionId: session.id, 
+        url: session.url 
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,

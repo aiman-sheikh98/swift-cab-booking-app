@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -62,6 +63,12 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       const serviceFee = Math.round(baseFare * 0.1);
       const totalPrice = baseFare + distanceFare + serviceFee;
 
+      // Get the current user information
+      if (!user) {
+        toast.error("You must be logged in to book a ride");
+        return;
+      }
+
       // Create Stripe checkout session
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
@@ -70,21 +77,38 @@ export const BookingForm: React.FC<BookingFormProps> = ({
           date: format(date, "MMM dd, yyyy"),
           time,
           vehicleType: vehicleTypeFormatted,
-          price: totalPrice
+          price: totalPrice,
+          userId: user.id,
+          email: user.email
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Stripe payment error:", error);
+        throw error;
+      }
 
       // Redirect to Stripe Checkout
-      if (data.url) {
+      if (data?.url) {
+        // Save booking details to localStorage for retrieval after payment
+        localStorage.setItem('pendingBooking', JSON.stringify({
+          pickupLocation,
+          dropoffLocation,
+          date: format(date, "MMM dd, yyyy"),
+          time,
+          vehicleType: vehicleTypeFormatted,
+          price: totalPrice,
+        }));
+        
+        // Redirect to Stripe checkout page
         window.location.href = data.url;
       } else {
         throw new Error('No checkout URL received');
       }
     } catch (error) {
-      toast.error("Failed to process payment. Please try again.");
-      console.error(error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Payment failed: ${errorMessage}`);
+      console.error("Payment error:", error);
     } finally {
       setIsLoading(false);
     }
